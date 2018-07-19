@@ -1,13 +1,17 @@
 export function css(css) {
-  const wrapper = document.createElement('style');
-  wrapper.textContent = css;
-  return wrapper;
+  const styleEl = document.createElement('style');
+  styleEl.textContent = css;
+  return styleEl;
 }
 
-export function html(html) {
-  const wrapper = document.createElement('div');
-  wrapper.innerHTML = html;
-  return wrapper.firstElementChild;
+export function html(htmlArr, ...strings) {
+  const template = document.createElement('template');
+
+  htmlArr.forEach((a, i) => {
+    template.innerHTML += `${a}${strings[i] || ''}`;
+  });
+
+  return template.content;
 }
 
 export default {
