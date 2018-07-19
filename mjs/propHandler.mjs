@@ -8,16 +8,16 @@ export function attrChangedCB(el, args) {
   }
 }
 
-export function getAttrNames(attrs) {
-  return attrs.map(attr => camelToDash(getName(attr)));
+export function getAttrNames(props) {
+  return props.map(prop => camelToDash(getName(prop)));
 }
 
-export function setUpProps(el, attrs) {
-  if (el && Array.isArray(attrs)) {
+export function setUpProps(el, props) {
+  if (el && Array.isArray(props)) {
     el._propNames = {};
 
-    attrs.forEach(attr => {
-      const name = getName(attr);
+    props.forEach(prop => {
+      const name = getName(prop);
 
       el._propNames[name] = camelToDash(name);
 
@@ -34,16 +34,16 @@ export function setUpProps(el, attrs) {
         }
       };
 
-      if (typeof attr === 'object' && !Array.isArray(attr)) {
-        if (attr.hasOwnProperty('get')) {
-          props.get = attr.get;
+      if (typeof prop === 'object' && !Array.isArray(prop)) {
+        if (prop.hasOwnProperty('get')) {
+          props.get = prop.get;
         }
 
-        if (attr.hasOwnProperty('set')) {
+        if (prop.hasOwnProperty('set')) {
           props.set = val => {
-            const setAttr = attr.set.call(el, val);
+            const setAttr = prop.set.call(el, val);
 
-            if (!(setAttr === false || (attr.hasOwnProperty('attr') && attr.attr === false))) {
+            if (!(setAttr === false || (prop.hasOwnProperty('prop') && prop.attr === false))) {
               el.setAttribute(el._propNames[name], typeof val === 'object' ? JSON.stringify(val) : val);
             }
           };
@@ -52,9 +52,7 @@ export function setUpProps(el, attrs) {
 
       Object.defineProperty(el, name, props);
 
-      if (attr.hasOwnProperty('default')) {
-        el[name] = el.getAttribute(el._propNames[name]) || attr.default;
-      }
+      el[name] = el.getAttribute(el._propNames[name]) || prop.default || null;
     });
   }
 }
