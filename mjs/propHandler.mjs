@@ -12,11 +12,11 @@ export function getAttrNames(props) {
   return props.map(prop => camelToDash(getName(prop)));
 }
 
-export function setUpProps(el, props) {
-  if (el && Array.isArray(props)) {
+export function setUpProps(el, propObj) {
+  if (el && Array.isArray(propObj)) {
     el._propNames = {};
 
-    props.forEach(prop => {
+    propObj.forEach(prop => {
       const name = getName(prop);
 
       el._propNames[name] = camelToDash(name);
