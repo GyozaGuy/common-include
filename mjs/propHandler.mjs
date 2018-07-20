@@ -8,8 +8,8 @@ export function attrChangedCB(el, args) {
   }
 }
 
-export function getAttrNames(props) {
-  return props.map(prop => camelToDash(getName(prop)));
+export function getAttrNames(propObj) {
+  return propObj.map(prop => camelToDash(getName(prop)));
 }
 
 export function setUpProps(el, propObj) {
@@ -22,7 +22,7 @@ export function setUpProps(el, propObj) {
       el._propNames[name] = camelToDash(name);
 
       const props = {
-        get: () => el[`_${name}`],
+        get: () => el[`_${name}`] === 'true' ? true : el[`_${name}`] === 'false' ? false : el[`_${name}`],
         set: val => {
           if (val || val === false) {
             el[`_${name}`] = val;
