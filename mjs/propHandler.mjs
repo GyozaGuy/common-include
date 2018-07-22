@@ -24,7 +24,7 @@ export function setUpProps(el, propObj) {
       const props = {
         get: () => el[`_${name}`] === 'true' ? true : el[`_${name}`] === 'false' ? false : el[`_${name}`],
         set: val => {
-          if (val || val === false) {
+          if (val || val === false || val === 0) {
             el[`_${name}`] = val;
             el.setAttribute(el._propNames[name], val);
           } else {
@@ -52,7 +52,7 @@ export function setUpProps(el, propObj) {
 
       Object.defineProperty(el, name, props);
 
-      el[name] = el.getAttribute(el._propNames[name]) || (prop.default || prop.default === false ? prop.default : null);
+      el[name] = el.getAttribute(el._propNames[name]) || (prop.default || prop.default === false || prop.default === 0 ? prop.default : null);
     });
   }
 }
