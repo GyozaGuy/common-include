@@ -35,19 +35,11 @@ export function setUpProps(el, propObj) {
       };
 
       if (typeof prop === 'object' && !Array.isArray(prop)) {
-        if (prop.hasOwnProperty('get')) {
-          props.get = prop.get;
-        }
-
-        if (prop.hasOwnProperty('set')) {
-          props.set = val => {
-            const setAttr = prop.set.call(el, val);
-
-            if (!(setAttr === false || (prop.hasOwnProperty('prop') && prop.attr === false))) {
-              el.setAttribute(el._propNames[name], typeof val === 'object' ? JSON.stringify(val) : val);
-            }
-          };
-        }
+        ['get', 'set'].forEach(propName => {
+          if (prop.hasOwnProperty(propName)) {
+            props[propName] = prop[propName];
+          }
+        });
       }
 
       Object.defineProperty(el, name, props);
