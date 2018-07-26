@@ -22,7 +22,7 @@ export function setUpProps(el, propObj) {
       el._propNames[name] = camelToDash(name);
 
       const props = {
-        get: () => el[`_${name}`] === 'true' ? true : el[`_${name}`] === 'false' ? false : el[`_${name}`],
+        get: () => el[`_${name}`] === 'true' ? true : el[`_${name}`] === 'false' ? false : el[`_${name}`] || null,
         set: val => {
           if (val || val === false || val === 0) {
             el[`_${name}`] = val;
@@ -52,7 +52,7 @@ export function setUpProps(el, propObj) {
               if (!(prop.hasOwnProperty('setAttr') && prop.setAttr === false)) {
                 el.setAttribute(el._propNames[name], typeof val === 'object' ? JSON.stringify(val) : val);
               }
-            } else {
+            } else if (lastVal) {
               el.setAttribute(el._propNames[name], lastVal);
             }
           };

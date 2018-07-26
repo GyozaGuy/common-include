@@ -6,10 +6,13 @@ export function css(css) {
 
 export function html(htmlArr, ...strings) {
   const template = document.createElement('template');
+  let htmlString = '';
 
   htmlArr.forEach((a, i) => {
-    template.innerHTML += `${a}${strings[i] || ''}`;
+    htmlString += `${a}${strings[i] || ''}`;
   });
+
+  template.innerHTML = htmlString;
 
   return template.content;
 }
