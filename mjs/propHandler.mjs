@@ -53,7 +53,7 @@ export function setUpProps(el, propObj) {
                 el.setAttribute(el._propNames[name], typeof val === 'object' ? JSON.stringify(val) : val);
               }
             } else if (lastVal) {
-              el.setAttribute(el._propNames[name], lastVal);
+              el.setAttribute(el._propNames[name], typeof lastVal === 'object' ? JSON.stringify(lastVal) : lastVal);
             }
           };
         }
