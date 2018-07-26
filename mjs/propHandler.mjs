@@ -26,7 +26,9 @@ export function setUpProps(el, propObj) {
         set: val => {
           if (val || val === false || val === 0) {
             el[`_${name}`] = val;
-            el.setAttribute(el._propNames[name], val);
+            if (!(prop.hasOwnProperty('setAttr') && prop.setAttr === false)) {
+              el.setAttribute(el._propNames[name], val);
+            }
           } else {
             delete el[`_${name}`];
             el.removeAttribute(el._propNames[name]);
@@ -59,7 +61,7 @@ export function setUpProps(el, propObj) {
 
       Object.defineProperty(el, name, props);
 
-      el[name] = el.getAttribute(el._propNames[name]) || (prop.default || prop.default === false || prop.default === 0 ? prop.default : null);
+      el[name] = el.getAttribute(el._propNames[name]) || (prop.default || prop.default === false || prop.default === 0 ? typeof prop.default === 'object' ? JSON.stringify(prop.default) : prop.default : null);
     });
   }
 }
