@@ -13,62 +13,59 @@ export function getAttrNames(propObj) {
 }
 
 export function setUpProps(el, propObj) {
-  if (el && Array.isArray(propObj)) {
-    el._propNames = {};
+  setTimeout(() => {
+    if (el && Array.isArray(propObj)) {
+      el._propNames = {};
 
-    propObj.forEach(prop => {
-      const name = getName(prop);
+      propObj.forEach(prop => {
+        const name = getName(prop);
 
-      el._propNames[name] = camelToDash(name);
+        el._propNames[name] = camelToDash(name);
 
-      const props = {
-        get: () => el[`_${name}`] === 'true' ? true : el[`_${name}`] === 'false' ? false : el[`_${name}`] || null,
-        set: val => {
-          if (val || val === false || val === 0) {
-            el[`_${name}`] = val;
-            if (!(prop.hasOwnProperty('setAttr') && prop.setAttr === false)) {
-              el.setAttribute(el._propNames[name], val);
+        const props = {
+          get: () => el[`_${name}`] === 'true' ? true : el[`_${name}`] === 'false' ? false : el[`_${name}`] || null,
+          set: val => {
+            if (val || val === false || val === 0) {
+              el[`_${name}`] = val;
+              if (!(prop.hasOwnProperty('setAttr') && prop.setAttr === false)) {
+                el.setAttribute(el._propNames[name], val);
+              }
+            } else {
+              delete el[`_${name}`];
+              el.removeAttribute(el._propNames[name]);
             }
-          } else {
-            delete el[`_${name}`];
-            el.removeAttribute(el._propNames[name]);
+          }
+        };
+
+        if (typeof prop === 'object' && !Array.isArray(prop)) {
+          if (prop.hasOwnProperty('get')) {
+            props.get = prop.get;
+          }
+
+          if (prop.hasOwnProperty('set')) {
+            props.set = val => {
+              let lastVal = el[name];
+              const setPropSuccess = prop.set.call(el, val);
+
+              if (setPropSuccess) {
+                lastVal = val;
+
+                if (!(prop.hasOwnProperty('setAttr') && prop.setAttr === false)) {
+                  el.setAttribute(el._propNames[name], typeof val === 'object' ? JSON.stringify(val) : val);
+                }
+              } else if (lastVal && el.hasAttribute(el._propNames[name])) {
+                el.setAttribute(el._propNames[name], typeof lastVal === 'object' ? JSON.stringify(lastVal) : lastVal);
+              }
+            };
           }
         }
-      };
 
-      if (typeof prop === 'object' && !Array.isArray(prop)) {
-        if (prop.hasOwnProperty('get')) {
-          props.get = prop.get;
-        }
+        Object.defineProperty(el, name, props);
 
-        if (prop.hasOwnProperty('set')) {
-          props.set = val => {
-            let lastVal = el[name];
-            const setPropSuccess = prop.set.call(el, val);
-
-            if (setPropSuccess) {
-              lastVal = val;
-
-              if (!(prop.hasOwnProperty('setAttr') && prop.setAttr === false)) {
-                el.setAttribute(el._propNames[name], typeof val === 'object' ? JSON.stringify(val) : val);
-              }
-            } else if (lastVal && el.hasAttribute(el._propNames[name])) {
-              el.setAttribute(el._propNames[name], typeof lastVal === 'object' ? JSON.stringify(lastVal) : lastVal);
-            }
-          };
-        }
-      }
-
-      Object.defineProperty(el, name, props);
-
-      const defaultValue = el.getAttribute(el._propNames[name]) || (prop.default || prop.default === false || prop.default === 0 ? typeof prop.default === 'object' ? JSON.stringify(prop.default) : prop.default : null);
-      el[`_${name}`] = defaultValue;
-
-      if ((defaultValue || defaultValue === false || defaultValue === 0) && !(prop.hasOwnProperty('setAttr') && prop.setAttr === false)) {
-        el.setAttribute(el._propNames[name], defaultValue);
-      }
-    });
-  }
+        el[name] = el.getAttribute(el._propNames[name]) || (prop.default || prop.default === false || prop.default === 0 ? typeof prop.default === 'object' ? JSON.stringify(prop.default) : prop.default : null);
+      });
+    }
+  });
 }
 
 function getName(val) {
