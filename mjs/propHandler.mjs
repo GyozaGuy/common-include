@@ -52,7 +52,7 @@ export function setUpProps(el, propObj) {
               if (!(prop.hasOwnProperty('setAttr') && prop.setAttr === false)) {
                 el.setAttribute(el._propNames[name], typeof val === 'object' ? JSON.stringify(val) : val);
               }
-            } else if (lastVal) {
+            } else if (lastVal && el.hasAttribute(el._propNames[name])) {
               el.setAttribute(el._propNames[name], typeof lastVal === 'object' ? JSON.stringify(lastVal) : lastVal);
             }
           };
