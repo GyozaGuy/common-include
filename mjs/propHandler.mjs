@@ -64,7 +64,7 @@ export function setUpProps(el, propObj) {
       const defaultValue = el.getAttribute(el._propNames[name]) || (prop.default || prop.default === false || prop.default === 0 ? typeof prop.default === 'object' ? JSON.stringify(prop.default) : prop.default : null);
       el[`_${name}`] = defaultValue;
 
-      if (!(prop.hasOwnProperty('setAttr') && prop.setAttr === false)) {
+      if ((defaultValue || defaultValue === false || defaultValue === 0) && !(prop.hasOwnProperty('setAttr') && prop.setAttr === false)) {
         el.setAttribute(el._propNames[name], defaultValue);
       }
     });
