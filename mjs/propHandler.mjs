@@ -61,7 +61,12 @@ export function setUpProps(el, propObj) {
 
       Object.defineProperty(el, name, props);
 
-      el[name] = el.getAttribute(el._propNames[name]) || (prop.default || prop.default === false || prop.default === 0 ? typeof prop.default === 'object' ? JSON.stringify(prop.default) : prop.default : null);
+      const defaultValue = el.getAttribute(el._propNames[name]) || (prop.default || prop.default === false || prop.default === 0 ? typeof prop.default === 'object' ? JSON.stringify(prop.default) : prop.default : null);
+      el[`_${name}`] = defaultValue;
+
+      if (!(prop.hasOwnProperty('setAttr') && prop.setAttr === false)) {
+        el.setAttribute(el._propNames[name], defaultValue);
+      }
     });
   }
 }
