@@ -4,6 +4,7 @@ export function createComponent(opts = {}) {
   const options = Object.assign({}, {
     attributeChangedCallback: () => {},
     connectedCallback: () => {},
+    disconnectedCallback: () => {},
     properties: [],
     shadowDOM: false,
     styles: '',
@@ -52,6 +53,10 @@ export function createComponent(opts = {}) {
 
       setUpProps(this, options.properties);
       options.connectedCallback.call(this);
+    }
+
+    disconnectedCallback() {
+      options.disconnectedCallback.call(this);
     }
   };
   componentClass.observedAttributes = getAttrNames(options.properties);
