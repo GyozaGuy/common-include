@@ -13,19 +13,19 @@ export function attrChangedCB(el, args) {
   }
 }
 
-export function getAttrNames(propObj) {
-  if (Array.isArray(propObj)) {
-    return propObj.map(prop => camelToDash(getName(prop)));
+export function getObservedAttrs(propArr) {
+  if (Array.isArray(propArr)) {
+    return propArr.filter(prop => prop.observed !== false).map(prop => camelToDash(getName(prop)));
   }
 
-  console.error('propObj should be an array of objects!');
+  console.error('propArr should be an array of objects!');
 }
 
-export function setUpProps(el, propObj) {
-  if (el && Array.isArray(propObj)) {
+export function setUpProps(el, propArr) {
+  if (el && Array.isArray(propArr)) {
     el._propNames = {};
 
-    propObj.forEach(prop => { // eslint-disable-line complexity
+    propArr.forEach(prop => { // eslint-disable-line complexity
       const name = getName(prop);
 
       el._propNames[name] = camelToDash(name);
@@ -89,7 +89,7 @@ export function setUpProps(el, propObj) {
       el[name] = el.getAttribute(el._propNames[name]) || defaultValue;
     });
   } else {
-    console.error('propObj should be an array of objects!');
+    console.error('propArr should be an array of objects!');
   }
 }
 
@@ -99,6 +99,6 @@ function getName(val) {
 
 export default {
   attrChangedCB,
-  getAttrNames,
+  getObservedAttrs,
   setUpProps
 };
