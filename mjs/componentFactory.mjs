@@ -1,4 +1,4 @@
-import {attrChangedCB, getAttrNames, setUpProps} from './propHandler.mjs';
+import {attrChangedCB, getObservedAttrs, setUpProps} from './propHandler.mjs';
 
 export function createComponent(name, opts = {}) {
   if (name && typeof name === 'string' && /^[a-z]/i.test(name)) {
@@ -74,7 +74,7 @@ export function createComponent(name, opts = {}) {
       }
     };
 
-    componentClass.observedAttributes = getAttrNames(options.properties);
+    componentClass.observedAttributes = getObservedAttrs(options.properties);
     customElements.define(name, componentClass);
 
     return componentClass;
