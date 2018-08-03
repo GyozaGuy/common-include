@@ -8,7 +8,7 @@ export function createComponent(name, opts = {}) {
       disconnectedCallback: null, // called after the built in disconnectedCallback()
       properties: [], // array of property objects for propHandler to use to set up properties
       setup: null, // used to set up any variables needed for custom property methods
-      shadowDOM: false, // whether or not to use shadow DOM
+      shadowDOM: true, // whether or not to use shadow DOM
       styles: '', // CSS styles, can be either a string or a DocumentFragment
       template: '' // HTML template, can be either a string or a DocumentFragment
     }, opts);
