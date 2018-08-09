@@ -6,6 +6,7 @@ export function createComponent(name, opts = {}) {
       attributeChangedCallback: null, // called after the built in attributeChangedCallback()
       connectedCallback: null, // called after the built in connectedCallback()
       disconnectedCallback: null, // called after the built in disconnectedCallback()
+      methods: [], // array of instance methods
       properties: [], // array of property objects for propHandler to use to set up properties
       setup: null, // used to set up any variables needed for custom property methods
       shadowDOM: true, // whether or not to use shadow DOM
@@ -35,7 +36,7 @@ export function createComponent(name, opts = {}) {
         attrChangedCB(this, args);
 
         if (typeof options.attributeChangedCallback === 'function') {
-          options.attributeChangedCallback(this, ...args);
+          options.attributeChangedCallback.call(this, ...args);
         }
       }
 
@@ -57,19 +58,23 @@ export function createComponent(name, opts = {}) {
         }
 
         if (typeof options.setup === 'function') {
-          options.setup(this);
+          options.setup.call(this);
         }
 
         setUpProps(this, options.properties);
 
+        Object.keys(options.methods).forEach(method => {
+          this[method] = options.methods[method];
+        });
+
         if (typeof options.connectedCallback === 'function') {
-          options.connectedCallback(this);
+          options.connectedCallback.call(this);
         }
       }
 
       disconnectedCallback() {
         if (typeof options.disconnectedCallback === 'function') {
-          options.disconnectedCallback(this);
+          options.disconnectedCallback.call(this);
         }
       }
     };
