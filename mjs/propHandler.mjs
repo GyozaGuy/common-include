@@ -25,6 +25,7 @@ export function setUpProps(el, propArr) {
   if (el && Array.isArray(propArr)) {
     el._propNames = {};
 
+    // Configure getters and setters for each property
     propArr.forEach(prop => { // eslint-disable-line complexity
       const name = getName(prop);
 
