@@ -44,7 +44,7 @@ export function setUpProps(el, propArr) {
           return returnValue;
         },
         set: val => {
-          if (val || val === false || val === 0) {
+          if (val || val === false || val === 0 || val === '') {
             el[`_${name}`] = val;
 
             if (!(prop.hasOwnProperty('setAttr') && prop.setAttr === false)) {
@@ -83,7 +83,7 @@ export function setUpProps(el, propArr) {
 
       let defaultValue;
 
-      if (prop.default || prop.default === false || prop.default === 0) {
+      if (prop.default || prop.default === false || prop.default === 0 || prop.default === '') {
         defaultValue = prop.default;
       }
 
