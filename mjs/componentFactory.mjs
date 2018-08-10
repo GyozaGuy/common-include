@@ -24,7 +24,7 @@ export function createComponent(name, opts = {}) {
 
           ['styles', 'template'].forEach(el => {
             if (isDOM(options[el])) {
-              this.shadowRoot.appendChild(options[el]);
+              this.shadowRoot.appendChild(options[el].cloneNode(true));
             } else {
               this.shadowRoot.innerHTML += options[el];
             }
@@ -44,14 +44,16 @@ export function createComponent(name, opts = {}) {
         if (!this._rendered && !options.shadowDOM) {
           this._rendered = true;
 
-          if (isDOM(options.styles)) {
-            document.head.appendChild(options.styles);
-          } else {
-            document.head.innerHTML += options.styles;
+          if (!document.head.querySelector(`style[component="${name}"]`)) {
+            if (isDOM(options.styles)) {
+              document.head.appendChild(options.styles.cloneNode(true));
+            } else {
+              document.head.innerHTML += options.styles;
+            }
           }
 
           if (isDOM(options.template)) {
-            this.appendChild(options.template);
+            this.appendChild(options.template.cloneNode(true));
           } else {
             this.innerHTML += options.template;
           }
