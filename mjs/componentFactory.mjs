@@ -23,7 +23,7 @@ export function createComponent(name, opts = {}) {
           this.attachShadow({mode: 'open'});
 
           ['styles', 'template'].forEach(el => {
-            if (options[el] instanceof DocumentFragment) {
+            if (isDOM(options[el])) {
               this.shadowRoot.appendChild(options[el]);
             } else {
               this.shadowRoot.innerHTML += options[el];
@@ -44,13 +44,13 @@ export function createComponent(name, opts = {}) {
         if (!this._rendered && !options.shadowDOM) {
           this._rendered = true;
 
-          if (options.styles instanceof DocumentFragment) {
+          if (isDOM(options.styles)) {
             document.head.appendChild(options.styles);
           } else {
             document.head.innerHTML += options.styles;
           }
 
-          if (options.template instanceof DocumentFragment) {
+          if (isDOM(options.template)) {
             this.appendChild(options.template);
           } else {
             this.innerHTML += options.template;
@@ -86,6 +86,10 @@ export function createComponent(name, opts = {}) {
   }
 
   throw new Error(`Invalid component name: ${name}`);
+}
+
+function isDOM(el) {
+  return el instanceof DocumentFragment || el instanceof HTMLElement;
 }
 
 export default {

@@ -1,6 +1,6 @@
 export function css(css) {
   const styleEl = document.createElement('style');
-  styleEl.textContent = css;
+  styleEl.textContent = css.join();
   return styleEl;
 }
 
