@@ -13,16 +13,48 @@ export function attrChangedCB(el, args) {
   }
 }
 
-export function getObservedAttrs(propArr) {
-  if (Array.isArray(propArr)) {
-    return propArr.filter(prop => prop.observed !== false).map(prop => camelToDash(getName(prop)));
+export function getObservedAttrs(propObj) {
+  if (propObj && typeof propObj === 'object') {
+    if (Array.isArray(propObj)) {
+      return propObj.filter(prop => prop.observed !== false).map(prop => camelToDash(getName(prop)));
+    }
+
+    return Object.keys(propObj).filter(prop => propObj[prop] === null || (propObj[prop] && propObj[prop].observed !== false)).map(prop => camelToDash(prop));
   }
 
-  console.error('propArr should be an array of objects!');
+  console.error('propObj should be an object or array of objects!');
 }
 
-export function setUpProps(el, propArr) {
-  if (el && Array.isArray(propArr)) {
+export function setUpProps(el, propObj) {
+  if (el && propObj && typeof propObj === 'object') {
+    let propArr;
+
+    // Attempt to format propObj in a way that can be processed, allowing either an array or an object
+    if (Array.isArray(propObj)) {
+      propArr = propObj;
+    } else {
+      propArr = Object.keys(propObj).map(prop => {
+        const currentValue = propObj[prop];
+
+        if (currentValue !== null) {
+          let obj;
+
+          if (typeof currentValue !== 'object' || Array.isArray(currentValue)) {
+            obj = {
+              default: currentValue,
+              name: prop
+            };
+          } else if (typeof currentValue === 'object') {
+            obj = Object.assign({}, currentValue, {name: prop});
+          }
+
+          return obj || {};
+        }
+
+        return prop;
+      });
+    }
+
     el._propNames = {};
 
     // Configure getters and setters for each property
@@ -33,26 +65,36 @@ export function setUpProps(el, propArr) {
 
       const props = {
         get: () => {
-          let returnValue = el[`_${name}`];
+          let returnVal = el[`_${name}`];
 
-          if (returnValue === 'true') {
-            returnValue = true;
-          } else if (returnValue === 'false') {
-            returnValue = false;
+          if (typeof returnVal === 'string') {
+            if (returnVal.toLowerCase() === 'true') {
+              returnVal = true;
+            } else if (returnVal.toLowerCase() === 'false') {
+              returnVal = false;
+            }
           }
 
-          return returnValue;
+          return returnVal;
         },
         set: val => {
-          if (val || val === false || val === 0 || val === '') {
-            el[`_${name}`] = val;
+          let setVal = val;
+
+          if (typeof setVal === 'string') {
+            if (setVal.toLowerCase() === 'true') {
+              setVal = true;
+            } else if (setVal.toLowerCase() === 'false') {
+              setVal = false;
+            }
+          }
+
+          if ((setVal || setVal === false || setVal === 0 || setVal === '') &&
+              (!prop.hasOwnProperty('default') || typeof setVal === typeof prop.default)) {
+            el[`_${name}`] = setVal;
 
             if (!(prop.hasOwnProperty('setAttr') && prop.setAttr === false)) {
-              el.setAttribute(el._propNames[name], typeof val === 'object' ? JSON.stringify(val) : val);
+              el.setAttribute(el._propNames[name], typeof setVal === 'object' ? JSON.stringify(setVal) : setVal);
             }
-          } else {
-            delete el[`_${name}`];
-            el.removeAttribute(el._propNames[name]);
           }
         }
       };
@@ -90,7 +132,7 @@ export function setUpProps(el, propArr) {
       el[name] = el.getAttribute(el._propNames[name]) || defaultValue;
     });
   } else {
-    console.error('propArr should be an array of objects!');
+    console.error('propObj should be an object or array of objects!');
   }
 }
 
