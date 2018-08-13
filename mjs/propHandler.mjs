@@ -77,7 +77,7 @@ export function setUpProps(el, propObj) {
 
           return returnVal;
         },
-        set: val => {
+        set: val => { // eslint-disable-line complexity
           let setVal = val;
 
           if (typeof setVal === 'string') {
@@ -86,6 +86,10 @@ export function setUpProps(el, propObj) {
             } else if (setVal.toLowerCase() === 'false') {
               setVal = false;
             }
+          }
+
+          if (prop.hasOwnProperty('default') && typeof prop.default === 'number') {
+            setVal = +setVal;
           }
 
           if ((setVal || setVal === false || setVal === 0 || setVal === '') &&
