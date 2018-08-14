@@ -41,13 +41,14 @@ export function createComponent(name, opts = {}) {
       }
 
       connectedCallback() { // eslint-disable-line complexity
-        // Pull content out of template element if present
-        const template = this.querySelector('template');
-
-        if (template) {
-          this.templateHTML = template.content.innerHTML;
-          this.templateText = template.content.textContent;
+        // Pull content out of component if present
+        if (this.innerHTML.trim()) {
+          const template = document.createElement('template');
+          template.innerHTML = this.innerHTML.trim();
+          this._innerHTML = template.content;
         }
+
+        this._textContent = this.textContent.trim();
 
         if (!this._rendered) {
           if (!options.shadowDOM) {
