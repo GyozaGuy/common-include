@@ -41,19 +41,19 @@ export function createComponent(name, opts = {}) {
       }
 
       connectedCallback() { // eslint-disable-line complexity
-        // Pull content out of component if present
-        if (this.innerHTML.trim()) {
-          const template = document.createElement('template');
-          template.innerHTML = this.innerHTML.trim();
-          this._innerHTML = template.content;
-        }
-
-        this._textContent = this.textContent.trim();
-
         if (!this._rendered) {
-          if (!options.shadowDOM) {
-            this._rendered = true;
+          this._rendered = true;
 
+          // Pull content out of component if present
+          if (this.innerHTML.trim()) {
+            const template = document.createElement('template');
+            template.innerHTML = this.innerHTML.trim();
+            this._innerHTML = template.content;
+          }
+
+          this._textContent = this.textContent.trim();
+
+          if (!options.shadowDOM) {
             if (!document.head.querySelector(`style[component="${name}"]`)) {
               if (isDOM(options.styles)) {
                 document.head.appendChild(options.styles.cloneNode(true));
