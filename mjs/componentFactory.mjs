@@ -40,30 +40,40 @@ export function createComponent(name, opts = {}) {
         }
       }
 
-      connectedCallback() {
-        if (!this._rendered && !options.shadowDOM) {
-          this._rendered = true;
+      connectedCallback() { // eslint-disable-line complexity
+        // Pull content out of template element if present
+        const template = this.querySelector('template');
 
-          if (!document.head.querySelector(`style[component="${name}"]`)) {
-            if (isDOM(options.styles)) {
-              document.head.appendChild(options.styles.cloneNode(true));
+        if (template) {
+          this.templateHTML = template.content.innerHTML;
+          this.templateText = template.content.textContent;
+        }
+
+        if (!this._rendered) {
+          if (!options.shadowDOM) {
+            this._rendered = true;
+
+            if (!document.head.querySelector(`style[component="${name}"]`)) {
+              if (isDOM(options.styles)) {
+                document.head.appendChild(options.styles.cloneNode(true));
+              } else {
+                document.head.innerHTML += options.styles;
+              }
+            }
+
+            if (isDOM(options.template)) {
+              this.appendChild(options.template.cloneNode(true));
             } else {
-              document.head.innerHTML += options.styles;
+              this.innerHTML += options.template;
             }
           }
 
-          if (isDOM(options.template)) {
-            this.appendChild(options.template.cloneNode(true));
-          } else {
-            this.innerHTML += options.template;
+          if (typeof options.setup === 'function') {
+            options.setup.call(this);
           }
-        }
 
-        if (typeof options.setup === 'function') {
-          options.setup.call(this);
+          setUpProps(this, options.properties);
         }
-
-        setUpProps(this, options.properties);
 
         Object.keys(options.methods).forEach(method => {
           this[method] = options.methods[method];
