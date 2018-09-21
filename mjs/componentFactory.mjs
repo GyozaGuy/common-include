@@ -23,10 +23,12 @@ export function createComponent(name, opts = {}) {
           this.attachShadow({mode: 'open'});
 
           ['styles', 'template'].forEach(el => {
-            if (isDOM(options[el])) {
-              this.shadowRoot.appendChild(options[el].cloneNode(true));
-            } else {
-              this.shadowRoot.innerHTML += options[el];
+            if (options[el]) {
+              if (isDOM(options[el])) {
+                this.shadowRoot.appendChild(options[el].cloneNode(true));
+              } else {
+                this.shadowRoot.innerHTML += options[el];
+              }
             }
           });
         }
@@ -55,17 +57,21 @@ export function createComponent(name, opts = {}) {
 
           if (!options.shadowDOM) {
             if (!document.head.querySelector(`style[component="${name}"]`)) {
-              if (isDOM(options.styles)) {
-                document.head.appendChild(options.styles.cloneNode(true));
-              } else {
-                document.head.innerHTML += options.styles;
+              if (options.styles) {
+                if (isDOM(options.styles)) {
+                  document.head.appendChild(options.styles.cloneNode(true));
+                } else {
+                  document.head.innerHTML += options.styles;
+                }
               }
             }
 
-            if (isDOM(options.template)) {
-              this.appendChild(options.template.cloneNode(true));
-            } else {
-              this.innerHTML += options.template;
+            if (options.template) {
+              if (isDOM(options.template)) {
+                this.appendChild(options.template.cloneNode(true));
+              } else {
+                this.innerHTML += options.template;
+              }
             }
           }
 
