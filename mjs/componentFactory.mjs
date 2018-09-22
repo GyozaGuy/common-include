@@ -6,8 +6,8 @@ export function createComponent(name, opts = {}) {
       attributeChangedCallback: null, // called after the built in attributeChangedCallback()
       connectedCallback: null, // called after the built in connectedCallback()
       disconnectedCallback: null, // called after the built in disconnectedCallback()
-      methods: [], // array of instance methods
-      properties: [], // array of property objects for propHandler to use to set up properties
+      methods: {}, // object containing instance method definitions
+      properties: {}, // object containing property definition objects to use to set up properties
       setup: null, // used to set up any variables needed for custom property methods
       shadowDOM: true, // whether or not to use shadow DOM
       styles: '', // CSS styles, can be either a string or a DocumentFragment
