@@ -11,9 +11,17 @@ if (location.search) {
 
 const currentLocale = search.lang || document.body.lang || 'en-US';
 
-export function lang(key) {
+export function lang(key, data) {
   if (key && cachedLocales) {
-    return cachedLocales[currentLocale][key] || cachedLocales['en-US'][key] || key;
+    let string = cachedLocales[currentLocale][key] || cachedLocales['en-US'][key] || key;
+
+    if (data) {
+      Object.entries(data).forEach(([key, value]) => {
+        string = string.replace(`{${key}}`, value);
+      });
+    }
+
+    return string;
   }
 
   return 'No key provided or no locales set!';
