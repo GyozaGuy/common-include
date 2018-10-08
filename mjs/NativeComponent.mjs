@@ -4,7 +4,6 @@ export default class extends HTMLElement {
   constructor() {
     super();
     this._rendered = false;
-    this.properties = {};
     this.shadowDOM = true;
     this.styles = '';
     this.template = '';
@@ -42,24 +41,24 @@ export default class extends HTMLElement {
         }
       }
 
-      setUpProps(this, this.properties);
+      setUpProps(this, this.constructor.properties);
       this._rendered = true;
     }
   }
 
   static get observedAttributes() {
-    if (this.properties && typeof this.properties === 'object') {
-      return getObservedAttrs(this, this.properties);
+    if (this.constructor.properties && typeof this.constructor.properties === 'object') {
+      return getObservedAttrs(this, this.constructor.properties);
     }
   }
 
-  get properties() {
-    return this._properties;
-  }
-
-  set properties(properties) {
-    this._properties = properties;
-  }
+  // get properties() {
+  //   return this._properties;
+  // }
+  //
+  // set properties(properties) {
+  //   this._properties = properties;
+  // }
 
   get shadowDOM() {
     return this._shadowDOM;
