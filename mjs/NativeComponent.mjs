@@ -47,18 +47,8 @@ export default class extends HTMLElement {
   }
 
   static get observedAttributes() {
-    if (this.constructor.properties && typeof this.constructor.properties === 'object') {
-      return getObservedAttrs(this, this.constructor.properties);
-    }
+    return getObservedAttrs(this.properties);
   }
-
-  // get properties() {
-  //   return this._properties;
-  // }
-  //
-  // set properties(properties) {
-  //   this._properties = properties;
-  // }
 
   get shadowDOM() {
     return this._shadowDOM;
