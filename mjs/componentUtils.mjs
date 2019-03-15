@@ -64,7 +64,7 @@ export class Component extends HTMLElement {
     }
   };
   _rendered = false;
-  _root = this;
+  root = this;
 
   constructor() {
     super();
@@ -77,15 +77,15 @@ export class Component extends HTMLElement {
     if (!this._rendered) {
       if (this.useShadow) {
         this.attachShadow({mode: 'open'});
-        this._root = this.shadowRoot;
+        this.root = this.shadowRoot;
       }
 
       [this.styles, this.template].forEach(content => {
         if (content) {
           if (this._isDOM(content)) {
-            this._root.appendChild(content);
+            this.root.appendChild(content);
           } else {
-            this._root.innerHTML += content;
+            this.root.innerHTML += content;
           }
         }
       });
@@ -135,6 +135,10 @@ export class Component extends HTMLElement {
     return Object.keys(this.properties).map(p => toAttrName(p));
   }
 
+  static get properties() {
+    return {};
+  }
+
   static get reflectedAttributes() {
     return Object.entries(this.properties).filter(([propName, propObj]) => {
       if (propObj.hasOwnProperty('type')) {
@@ -158,8 +162,8 @@ export class Component extends HTMLElement {
       target.textContent = this[property];
     };
 
-    this._bindListeners[property].push(callback);
-    callback(this[property]);
+    this._bindListeners[property].push(callback.bind(this));
+    callback.call(this, this[property]);
   }
 
   clearEvents(target = this) {
@@ -175,11 +179,11 @@ export class Component extends HTMLElement {
   }
 
   select(selector) {
-    return this._root.querySelector(selector);
+    return this.root.querySelector(selector);
   }
 
   selectAll(selector) {
-    return this._root.querySelectorAll(selector);
+    return this.root.querySelectorAll(selector);
   }
 
   _isDOM(el) {
