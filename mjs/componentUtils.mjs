@@ -241,7 +241,7 @@ export function onEvent(context, target, eventName, callback, options = {}) {
     listeners[context] = [];
   }
 
-  target.addEventListener(eventName, event => callback(event.detail, event), options);
+  target.addEventListener(eventName, event => callback(event), options);
 
   listeners[context].push(() => target.removeEventListener(eventName, callback, options));
 }
