@@ -80,15 +80,23 @@ export class Component extends HTMLElement {
         this.root = this.shadowRoot;
       }
 
-      [this.styles, this.template].forEach(content => {
-        if (content) {
-          if (this._isDOM(content)) {
-            this.root.appendChild(content);
-          } else {
-            this.root.innerHTML += content;
-          }
+      if (this.styles) {
+        if (this._isDOM(this.styles)) {
+          this.root.appendChild(this.styles);
+        } else {
+          const styleEl = document.createElement('style');
+          styleEl.textContent = this.styles;
+          this.root.innerHTML += styleEl.outerHTML;
         }
-      });
+      }
+
+      if (this.template) {
+        if (this._isDOM(this.template)) {
+          this.root.appendChild(this.template);
+        } else {
+          this.root.innerHTML += this.template;
+        }
+      }
 
       const initialValues = {};
 
@@ -172,6 +180,11 @@ export class Component extends HTMLElement {
 
   emitEvent(eventName, detail, options) {
     emitEvent(this, eventName, detail, options);
+  }
+
+  async fetch(path, options) {
+    const response = await fetch(path, options);
+    return await response.json();
   }
 
   onEvent(target, eventName, callback, options) {
