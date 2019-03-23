@@ -183,8 +183,12 @@ export class Component extends HTMLElement {
   }
 
   async fetch(path, options) {
-    const response = await fetch(path, options);
-    return await response.json();
+    try {
+      const response = await fetch(path, options);
+      return await response.json();
+    } catch (err) {
+      return Promise.reject(err);
+    }
   }
 
   onEvent(target, eventName, callback, options) {
