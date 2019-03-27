@@ -67,6 +67,7 @@ export function Component(componentName) {
       }
     };
     _rendered = false;
+    _uniqueContextKey = Symbol('uniqueContextKey');
     root = this;
 
     constructor() {
@@ -184,7 +185,7 @@ export function Component(componentName) {
       callback.call(this, this[property]);
     }
 
-    clearEvents(context = this) {
+    clearEvents(context = this._uniqueContextKey) {
       clearEvents(context);
     }
 
@@ -202,7 +203,7 @@ export function Component(componentName) {
     }
 
     onEvent(target, eventName, callback, options = {}) {
-      onEvent(options.context || this, target, eventName, callback, options);
+      onEvent(options.context = this._uniqueContextKey, target, eventName, callback, options);
     }
 
     select(selector) {
@@ -305,6 +306,14 @@ export function checkBoolean({value}) {
   throw new TypeError(`Expected type "boolean" for value \`${value}\`, got "${typeof value}"!`);
 }
 
+export function checkFunction({value}) {
+  if (typeof value === 'function') {
+    return true;
+  }
+
+  throw new TypeError(`Expected type "function" for value \`${value}\`, got "${typeof value}"!`);
+}
+
 export function checkNumber({value}) {
   if (typeof value === 'number' && !isNaN(value)) {
     return true;
@@ -347,6 +356,7 @@ function getRequired(method, name, castClass) {
 const types = [
   {class: Array, method: checkArray},
   {class: Boolean, method: checkBoolean},
+  {class: Function, method: checkFunction},
   {class: Number, method: checkNumber},
   {class: Object, method: checkObject},
   {class: String, method: checkString}
