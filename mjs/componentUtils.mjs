@@ -1,231 +1,250 @@
 // Component class
 
-export class Component extends HTMLElement {
-  _bindListeners = {};
-  _defaultGet = propName => () => {
-    const currentProp = this.constructor.properties[propName];
-    const dashName = toAttrName(propName);
-    let value;
+export function Component(componentName) {
+  return class extends HTMLElement {
+    static _componentName = componentName;
 
-    if (this.constructor.reflectedAttributes.includes(dashName)) {
-      if (currentProp.hasOwnProperty('type')) {
-        if (currentProp.type.name === 'boolean' && currentProp.toggle) {
-          value = currentProp.type.cast(this.hasAttribute(dashName));
-        } else {
-          value = currentProp.type.cast(this.getAttribute(dashName));
-        }
-      } else {
-        value = this.getAttribute(dashName);
-      }
-    } else {
-      value = this[`_${propName}`];
-    }
-
-    if (typeof currentProp.getCallback === 'function' && this._rendered) {
-      currentProp.getCallback(value, this);
-    }
-
-    return value;
-  };
-  _defaultSet = propName => value => {
-    const currentProp = this.constructor.properties[propName];
-
-    if ((currentProp.hasOwnProperty('type') && currentProp.type.check({propName, value})) ||
-        !currentProp.hasOwnProperty('type')) {
-      this[`_${propName}`] = value;
-
+    _bindListeners = {};
+    _defaultGet = propName => () => {
+      const currentProp = this.constructor.properties[propName];
       const dashName = toAttrName(propName);
+      let value;
 
       if (this.constructor.reflectedAttributes.includes(dashName)) {
-        if (!currentProp.hasOwnProperty('type') ||
-            (currentProp.type.name === 'boolean' && !currentProp.toggle) ||
-            currentProp.type.name !== 'boolean') {
-          this.setAttribute(dashName, value);
-        } else if (currentProp.type.name === 'boolean' && currentProp.toggle) {
-          if (value) {
-            this.setAttribute(dashName, '');
+        if (currentProp.hasOwnProperty('type')) {
+          if (currentProp.type.name === 'boolean' && currentProp.toggle) {
+            value = currentProp.type.cast(this.hasAttribute(dashName));
           } else {
-            this.removeAttribute(dashName);
+            value = currentProp.type.cast(this.getAttribute(dashName));
           }
-        }
-
-        if (currentProp.cssProperty) {
-          this.style.setProperty(`--${dashName}`, value);
-        }
-      }
-
-      if (typeof currentProp.setCallback === 'function' && this._rendered) {
-        currentProp.setCallback(value, this);
-      }
-
-      if (Array.isArray(this._bindListeners[propName])) {
-        this._bindListeners[propName].forEach(method => method(value));
-      }
-    }
-  };
-  _rendered = false;
-  root = this;
-
-  constructor() {
-    super();
-    this.useShadow = true;
-  }
-
-  connected() {}
-
-  connectedCallback() {
-    if (!this._rendered) {
-      if (this.useShadow) {
-        this.attachShadow({mode: 'open'});
-        this.root = this.shadowRoot;
-      }
-
-      if (this.styles) {
-        if (this._isDOM(this.styles)) {
-          this.root.appendChild(this.styles);
         } else {
-          const styleEl = document.createElement('style');
-          styleEl.textContent = this.styles;
-          this.root.innerHTML += styleEl.outerHTML;
+          value = this.getAttribute(dashName);
         }
-      }
-
-      if (this.template) {
-        if (this._isDOM(this.template)) {
-          this.root.appendChild(this.template);
-        } else {
-          this.root.innerHTML += this.template;
-        }
-      }
-
-      const initialValues = {};
-
-      Object.entries(this.constructor.properties).forEach(([propName, propObj]) => {
-        const initialValue = this._upgradeProperty(propName, propObj.default);
-
-        if (propObj.hasOwnProperty('type') && (initialValue || propObj.type.isRequired)) {
-          try {
-            if (propObj.type.check({propName, value: initialValue})) {
-              initialValues[propName] = initialValue;
-            }
-          } catch (err) {
-            console.error(err);
-            this.remove();
-          }
-        } else if (initialValue) {
-          initialValues[propName] = initialValue;
-        }
-
-        Object.defineProperty(this, propName, {
-          get: this._defaultGet(propName),
-          set: this._defaultSet(propName)
-        });
-      });
-
-      this._rendered = true;
-
-      Object.entries(initialValues).forEach(([propName, value]) => {
-        this[propName] = value;
-      });
-
-      this.connected();
-    }
-  }
-
-  disconnected() {}
-
-  disconnectedCallback() {
-    this.clearEvents();
-    this.disconnected();
-  }
-
-  static get observedAttributes() {
-    return Object.keys(this.properties).map(p => toAttrName(p));
-  }
-
-  static get properties() {
-    return {};
-  }
-
-  static get reflectedAttributes() {
-    return Object.entries(this.properties).filter(([propName, propObj]) => {
-      if (propObj.hasOwnProperty('type')) {
-        return ['boolean', 'number', 'string'].includes(propObj.type.name);
       } else {
-        return [propName, propObj];
+        value = this[`_${propName}`];
       }
-    }).map(p => toAttrName(p[0]));
-  }
 
-  get properties() {
-    return this.constructor.properties;
-  }
+      if (typeof currentProp.getCallback === 'function' && this._rendered) {
+        currentProp.getCallback(value, this);
+      }
 
-  bindTo(property, target) {
-    if (!this._bindListeners[property]) {
-      this._bindListeners[property] = [];
-    }
-
-    const callback = typeof target === 'function' ? target : () => {
-      target.textContent = this[property];
+      return value;
     };
+    _defaultSet = propName => value => {
+      const currentProp = this.constructor.properties[propName];
 
-    this._bindListeners[property].push(callback.bind(this));
-    callback.call(this, this[property]);
-  }
+      if ((currentProp.hasOwnProperty('type') && currentProp.type.check({propName, value})) ||
+          !currentProp.hasOwnProperty('type')) {
+        this[`_${propName}`] = value;
 
-  clearEvents(target = this) {
-    clearEvents(target);
-  }
+        const dashName = toAttrName(propName);
 
-  emitEvent(eventName, detail, options) {
-    emitEvent(this, eventName, detail, options);
-  }
+        if (this.constructor.reflectedAttributes.includes(dashName)) {
+          if (!currentProp.hasOwnProperty('type') ||
+              (currentProp.type.name === 'boolean' && !currentProp.toggle) ||
+              currentProp.type.name !== 'boolean') {
+            this.setAttribute(dashName, value);
+          } else if (currentProp.type.name === 'boolean' && currentProp.toggle) {
+            if (value) {
+              this.setAttribute(dashName, '');
+            } else {
+              this.removeAttribute(dashName);
+            }
+          }
 
-  async fetch(path, options) {
-    try {
-      const response = await fetch(path, options);
-      return await response.json();
-    } catch (err) {
-      return Promise.reject(err);
-    }
-  }
+          if (currentProp.cssProperty) {
+            this.style.setProperty(`--${dashName}`, value);
+          }
+        }
 
-  onEvent(target, eventName, callback, options) {
-    onEvent(this, target, eventName, callback, options);
-  }
+        if (typeof currentProp.setCallback === 'function' && this._rendered) {
+          currentProp.setCallback(value, this);
+        }
 
-  select(selector) {
-    return this.root.querySelector(selector);
-  }
-
-  selectAll(selector) {
-    return this.root.querySelectorAll(selector);
-  }
-
-  _isDOM(el) {
-    return el && (el instanceof DocumentFragment || el instanceof HTMLElement);
-  }
-
-  _upgradeProperty(propName, defaultValue) {
-    const dashName = toAttrName(propName);
-    const currentProp = this.constructor.properties[propName];
-    let value;
-
-    if (this.hasOwnProperty(propName)) {
-      value = this[propName];
-      delete this[propName];
-    } else if (this.hasAttribute(dashName) && (this.getAttribute(dashName) || currentProp.toggle)) {
-      if (currentProp.hasOwnProperty('type')) {
-        value = currentProp.type.cast(this.getAttribute(dashName));
-      } else {
-        value = this.getAttribute(dashName);
+        if (Array.isArray(this._bindListeners[propName])) {
+          this._bindListeners[propName].forEach(method => method(value));
+        }
       }
-    } else {
-      value = defaultValue;
+    };
+    _rendered = false;
+    root = this;
+
+    constructor() {
+      super();
+      this.useShadow = true;
     }
 
-    return value;
+    connected() {}
+
+    connectedCallback() {
+      if (!this._rendered) {
+        if (this.useShadow) {
+          this.attachShadow({mode: 'open'});
+          this.root = this.shadowRoot;
+        }
+
+        if (this.styles) {
+          if (this._isDOM(this.styles)) {
+            this.root.appendChild(this.styles);
+          } else {
+            const styleEl = document.createElement('style');
+
+            styleEl.textContent = this.styles;
+
+            if (this.useShadow) {
+              this.root.appendChild(templateUtils.dom(styleEl.outerHTML));
+            } else if (!document.head.querySelector(`style[component="${componentName}"]`)) {
+              styleEl.setAttribute('component', componentName);
+              document.head.appendChild(templateUtils.dom(styleEl.outerHTML));
+            }
+          }
+        }
+
+        if (this.template) {
+          if (this._isDOM(this.template)) {
+            this.root.appendChild(this.template);
+          } else {
+            this.root.innerHTML += this.template;
+          }
+        }
+
+        const initialValues = {};
+
+        Object.entries(this.constructor.properties).forEach(([propName, propObj]) => {
+          const initialValue = this._upgradeProperty(propName, propObj.default);
+
+          if (propObj.hasOwnProperty('type') && (initialValue || propObj.type.isRequired)) {
+            try {
+              if (propObj.type.check({propName, value: initialValue})) {
+                initialValues[propName] = initialValue;
+              }
+            } catch (err) {
+              console.error(err);
+              this.remove();
+            }
+          } else if (initialValue) {
+            initialValues[propName] = initialValue;
+          }
+
+          Object.defineProperty(this, propName, {
+            get: this._defaultGet(propName),
+            set: this._defaultSet(propName)
+          });
+        });
+
+        this._rendered = true;
+
+        Object.entries(initialValues).forEach(([propName, value]) => {
+          this[propName] = value;
+        });
+
+        this.connected();
+      }
+    }
+
+    disconnected() {}
+
+    disconnectedCallback() {
+      this.clearEvents();
+      this.disconnected();
+    }
+
+    static get observedAttributes() {
+      return Object.keys(this.properties).map(p => toAttrName(p));
+    }
+
+    static get properties() {
+      return {};
+    }
+
+    static get reflectedAttributes() {
+      return Object.entries(this.properties).filter(([propName, propObj]) => {
+        if (propObj.hasOwnProperty('type')) {
+          return ['boolean', 'number', 'string'].includes(propObj.type.name);
+        } else {
+          return [propName, propObj];
+        }
+      }).map(p => toAttrName(p[0]));
+    }
+
+    get properties() {
+      return this.constructor.properties;
+    }
+
+    bindTo(property, target) {
+      if (!this._bindListeners[property]) {
+        this._bindListeners[property] = [];
+      }
+
+      const callback = typeof target === 'function' ? target : () => {
+        target.textContent = this[property];
+      };
+
+      this._bindListeners[property].push(callback.bind(this));
+      callback.call(this, this[property]);
+    }
+
+    clearEvents(context = this) {
+      clearEvents(context);
+    }
+
+    emitEvent(eventName, detail, options) {
+      emitEvent(this, eventName, detail, options);
+    }
+
+    async fetch(path, options) {
+      try {
+        const response = await fetch(path, options);
+        return await response.json();
+      } catch (err) {
+        return Promise.reject(err);
+      }
+    }
+
+    onEvent(target, eventName, callback, options = {}) {
+      onEvent(options.context || this, target, eventName, callback, options);
+    }
+
+    select(selector) {
+      return this.root.querySelector(selector);
+    }
+
+    selectAll(selector) {
+      return this.root.querySelectorAll(selector);
+    }
+
+    _isDOM(el) {
+      return el && (el instanceof DocumentFragment || el instanceof HTMLElement);
+    }
+
+    _upgradeProperty(propName, defaultValue) {
+      const dashName = toAttrName(propName);
+      const currentProp = this.constructor.properties[propName];
+      let value;
+
+      if (this.hasOwnProperty(propName)) {
+        value = this[propName];
+        delete this[propName];
+      } else if (this.hasAttribute(dashName) && (this.getAttribute(dashName) || currentProp.toggle)) {
+        if (currentProp.hasOwnProperty('type')) {
+          value = currentProp.type.cast(this.getAttribute(dashName));
+        } else {
+          value = this.getAttribute(dashName);
+        }
+      } else {
+        value = defaultValue;
+      }
+
+      return value;
+    }
+  }
+}
+
+// Method to define an element
+
+export function defineElement(elementClass) {
+  if (elementClass) {
+    customElements.define(elementClass._componentName, elementClass);
   }
 }
 
@@ -262,9 +281,10 @@ export function onEvent(context, target, eventName, callback, options = {}) {
     listeners[context] = [];
   }
 
-  target.addEventListener(eventName, event => callback(event), options);
+  const cb = event => callback({data: event.detail, event});
 
-  listeners[context].push(() => target.removeEventListener(eventName, callback, options));
+  target.addEventListener(eventName, cb, options);
+  listeners[context].push(() => target.removeEventListener(eventName, cb, options));
 }
 
 // PropTypes
@@ -374,6 +394,7 @@ export const templateUtils = {dom, str};
 
 export default {
   Component,
+  defineElement,
   toAttrName,
   toPropName,
   clearEvents,
