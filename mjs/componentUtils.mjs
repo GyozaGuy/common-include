@@ -2,77 +2,74 @@
 
 export function Component(componentName) {
   return class extends HTMLElement {
-    static _componentName = componentName;
-
-    _bindListeners = {};
-    _defaultGet = propName => () => {
-      const currentProp = this.constructor.properties[propName];
-      const dashName = toAttrName(propName);
-      let value;
-
-      if (this.constructor.reflectedAttributes.includes(dashName)) {
-        if (currentProp.hasOwnProperty('type')) {
-          if (currentProp.type.name === 'boolean' && currentProp.toggle) {
-            value = currentProp.type.cast(this.hasAttribute(dashName));
-          } else {
-            value = currentProp.type.cast(this.getAttribute(dashName));
-          }
-        } else {
-          value = this.getAttribute(dashName);
-        }
-      } else {
-        value = this[`_${propName}`];
-      }
-
-      if (typeof currentProp.getCallback === 'function' && this._rendered) {
-        currentProp.getCallback(value, this);
-      }
-
-      return value;
-    };
-    _defaultSet = propName => value => {
-      const currentProp = this.constructor.properties[propName];
-
-      if ((currentProp.hasOwnProperty('type') && currentProp.type.check({propName, value})) ||
-          !currentProp.hasOwnProperty('type')) {
-        this[`_${propName}`] = value;
-
-        const dashName = toAttrName(propName);
-
-        if (this.constructor.reflectedAttributes.includes(dashName)) {
-          if (!currentProp.hasOwnProperty('type') ||
-              (currentProp.type.name === 'boolean' && !currentProp.toggle) ||
-              currentProp.type.name !== 'boolean') {
-            this.setAttribute(dashName, value);
-          } else if (currentProp.type.name === 'boolean' && currentProp.toggle) {
-            if (value) {
-              this.setAttribute(dashName, '');
-            } else {
-              this.removeAttribute(dashName);
-            }
-          }
-
-          if (currentProp.cssProperty) {
-            this.style.setProperty(`--${dashName}`, value);
-          }
-        }
-
-        if (typeof currentProp.setCallback === 'function' && this._rendered) {
-          currentProp.setCallback(value, this);
-        }
-
-        if (Array.isArray(this._bindListeners[propName])) {
-          this._bindListeners[propName].forEach(method => method(value));
-        }
-      }
-    };
-    _rendered = false;
-    _uniqueContextKey = Symbol('uniqueContextKey');
-    root = this;
-
     constructor() {
       super();
       this.useShadow = true;
+      this._bindListeners = {};
+      this._defaultGet = propName => () => {
+        const currentProp = this.constructor.properties[propName];
+        const dashName = toAttrName(propName);
+        let value;
+
+        if (this.constructor.reflectedAttributes.includes(dashName)) {
+          if (currentProp.hasOwnProperty('type')) {
+            if (currentProp.type.name === 'boolean' && currentProp.toggle) {
+              value = currentProp.type.cast(this.hasAttribute(dashName));
+            } else {
+              value = currentProp.type.cast(this.getAttribute(dashName));
+            }
+          } else {
+            value = this.getAttribute(dashName);
+          }
+        } else {
+          value = this[`_${propName}`];
+        }
+
+        if (typeof currentProp.getCallback === 'function' && this._rendered) {
+          currentProp.getCallback(value, this);
+        }
+
+        return value;
+      };
+      this._defaultSet = propName => value => {
+        const currentProp = this.constructor.properties[propName];
+
+        if ((currentProp.hasOwnProperty('type') && currentProp.type.check({propName, value})) ||
+            !currentProp.hasOwnProperty('type')) {
+          this[`_${propName}`] = value;
+
+          const dashName = toAttrName(propName);
+
+          if (this.constructor.reflectedAttributes.includes(dashName)) {
+            if (!currentProp.hasOwnProperty('type') ||
+                (currentProp.type.name === 'boolean' && !currentProp.toggle) ||
+                currentProp.type.name !== 'boolean') {
+              this.setAttribute(dashName, value);
+            } else if (currentProp.type.name === 'boolean' && currentProp.toggle) {
+              if (value) {
+                this.setAttribute(dashName, '');
+              } else {
+                this.removeAttribute(dashName);
+              }
+            }
+
+            if (currentProp.cssProperty) {
+              this.style.setProperty(`--${dashName}`, value);
+            }
+          }
+
+          if (typeof currentProp.setCallback === 'function' && this._rendered) {
+            currentProp.setCallback(value, this);
+          }
+
+          if (Array.isArray(this._bindListeners[propName])) {
+            this._bindListeners[propName].forEach(method => method(value));
+          }
+        }
+      };
+      this._rendered = false;
+      this._uniqueContextKey = Symbol('uniqueContextKey');
+      this.root = this;
     }
 
     connected() {}
@@ -148,6 +145,10 @@ export function Component(componentName) {
     disconnectedCallback() {
       this.clearEvents();
       this.disconnected();
+    }
+
+    static get _componentName() {
+      return componentName;
     }
 
     static get observedAttributes() {
