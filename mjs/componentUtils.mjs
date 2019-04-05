@@ -15,6 +15,8 @@ export function Component(componentName) {
           if (currentProp.hasOwnProperty('type')) {
             if (currentProp.type.name === 'boolean' && currentProp.toggle) {
               value = currentProp.type.cast(this.hasAttribute(dashName));
+            } else if (currentProp.attr === false) {
+              value = this[`_${propName}`];
             } else {
               value = currentProp.type.cast(this.getAttribute(dashName));
             }
@@ -41,9 +43,11 @@ export function Component(componentName) {
           const dashName = toAttrName(propName);
 
           if (this.constructor.reflectedAttributes.includes(dashName)) {
-            if (!currentProp.hasOwnProperty('type') ||
-                (currentProp.type.name === 'boolean' && !currentProp.toggle) ||
-                currentProp.type.name !== 'boolean') {
+            if (currentProp.attr !== false && (
+              !currentProp.hasOwnProperty('type') ||
+              (currentProp.type.name === 'boolean' && !currentProp.toggle) ||
+              currentProp.type.name !== 'boolean'
+            )) {
               this.setAttribute(dashName, value);
             } else if (currentProp.type.name === 'boolean' && currentProp.toggle) {
               if (value) {
