@@ -4,6 +4,7 @@ export function Component(componentName) {
   return class extends HTMLElement {
     constructor() {
       super();
+      this.root = this;
       this.useShadow = true;
       this._bindListeners = {};
       this._defaultGet = propName => () => {
@@ -69,11 +70,17 @@ export function Component(componentName) {
           if (Array.isArray(this._bindListeners[propName])) {
             this._bindListeners[propName].forEach(method => method(value));
           }
+
+          if (this._propUpdaters[propName]) {
+            this.selectAll(`[data-prop-id="${this._propUpdaters[propName]}"]`).forEach(el => {
+              el.textContent = value;
+            });
+          }
         }
       };
+      this._propUpdaters = {};
       this._rendered = false;
       this._uniqueContextKey = Symbol('uniqueContextKey');
-      this.root = this;
     }
 
     connected() {}
@@ -205,6 +212,38 @@ export function Component(componentName) {
       } catch (err) {
         return Promise.reject(err);
       }
+    }
+
+    html(templates, ...strings) {
+      const regEx = /\{\w+\}/gi;
+      const finishedTemplates = [];
+
+      templates.forEach(template => {
+        const matches = template.match(regEx);
+
+        if (matches) {
+          matches.forEach(match => {
+            const propName = match.replace(/[{}]/g, '');
+            let id;
+
+            if (this._propUpdaters[propName]) {
+              id = this._propUpdaters[propName];
+            } else {
+              id = `${propName}_${Math.random().toString(36).substr(2, 9)}`;
+              this._propUpdaters[propName] = id;
+            }
+
+            template = template.replace(
+              new RegExp(match, 'gi'),
+              `<span data-prop-id="${id}">${this[propName] || match}</span>`
+            );
+          });
+        }
+
+        finishedTemplates.push(template);
+      });
+
+      return finishedTemplates.reduce((acc, cur, i) => `${acc}${cur}${strings[i] || ''}`, '');
     }
 
     onEvent(target, eventName, callback, options = {}) {
