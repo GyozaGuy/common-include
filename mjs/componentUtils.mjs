@@ -266,6 +266,23 @@ export function Component(componentName) {
         }
 
         this.root.appendChild(dom(this.render()));
+
+        [
+          'click',
+          'dragstart',
+          'dragend',
+          'keydown',
+          'keyup',
+          'mouseover',
+          'mouseout',
+          'touchend',
+          'touchstart'
+        ].forEach(event => {
+          this.selectAll(`[${event}]`).forEach(el => {
+            // TODO: find a way to clean these up
+            el.addEventListener(event, this[el.getAttribute(event)].bind(this));
+          });
+        });
       }
     }
 
