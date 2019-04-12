@@ -63,22 +63,7 @@ export function Component(componentName) {
             }
           }
 
-          if (typeof this.render === 'function') {
-            // TODO: diff instead of replacing
-
-            if (this.shadowRoot && this.styles) {
-              // NOTE: children[0] should be a style element
-              while (this.root.children[1]) {
-                this.root.children[1].remove();
-              }
-            } else {
-              while (this.root.firstChild) {
-                this.root.firstChild.remove();
-              }
-            }
-
-            this.root.appendChild(dom(this.render()));
-          }
+          this._renderComponent();
 
           if (typeof currentProp.setCallback === 'function' && this._rendered) {
             currentProp.setCallback(value, this);
@@ -159,6 +144,7 @@ export function Component(componentName) {
           });
         });
 
+        this._renderComponent();
         this._rendered = true;
 
         Object.entries(initialValues).forEach(([propName, value]) => {
@@ -233,35 +219,19 @@ export function Component(componentName) {
     }
 
     html(templates, ...strings) {
-      const regEx = /\{\w+\}/gi;
-      const finishedTemplates = [];
+      return templates.reduce((acc, cur, i) => {
+        let currentString = strings[i] || '';
 
-      templates.forEach(template => {
-        const matches = template.match(regEx);
-
-        if (matches) {
-          matches.forEach(match => {
-            const propName = match.replace(/[{}]/g, '');
-            let id;
-
-            if (this._propUpdaters[propName]) {
-              id = this._propUpdaters[propName];
-            } else {
-              id = `${propName}_${Math.random().toString(36).substr(2, 9)}`;
-              this._propUpdaters[propName] = id;
-            }
-
-            template = template.replace(
-              new RegExp(match, 'gi'),
-              `<span data-prop-id="${id}">${this[propName] || match}</span>`
-            );
-          });
+        if (typeof currentString === 'object') {
+          if (Array.isArray(currentString)) {
+            currentString = currentString.join('');
+          } else {
+            currentString = JSON.stringify(currentString);
+          }
         }
 
-        finishedTemplates.push(template);
-      });
-
-      return finishedTemplates.reduce((acc, cur, i) => `${acc}${cur}${strings[i] || ''}`, '');
+        return `${acc}${cur}${currentString}`;
+      }, '');
     }
 
     onEvent(target, eventName, callback, options = {}) {
@@ -278,6 +248,25 @@ export function Component(componentName) {
 
     _isDOM(el) {
       return el && (el instanceof DocumentFragment || el instanceof HTMLElement);
+    }
+
+    _renderComponent() {
+      if (typeof this.render === 'function') {
+        // TODO: diff instead of replacing
+
+        if (this.shadowRoot && this.styles) {
+          // NOTE: children[0] should be a style element
+          while (this.root.children[1]) {
+            this.root.children[1].remove();
+          }
+        } else {
+          while (this.root.firstChild) {
+            this.root.firstChild.remove();
+          }
+        }
+
+        this.root.appendChild(dom(this.render()));
+      }
     }
 
     _upgradeProperty(propName, defaultValue) {
