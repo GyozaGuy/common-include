@@ -81,6 +81,7 @@ export function Component(componentName) {
       this._propUpdaters = {};
       this._rendered = false;
       this._uniqueContextKey = Symbol('uniqueContextKey');
+      html = this.html.bind(this);
     }
 
     connected() {}
@@ -427,6 +428,8 @@ export function dom(template, data = {}) {
   return templateEl.content;
 }
 
+export let html; // NOTE: this is defined in the constructor of Component()
+
 export function str(template, data = {}) {
   return insertData(template, data);
 }
@@ -442,7 +445,7 @@ function insertData(template, data) {
   return completedTemplate;
 }
 
-export const templateUtils = {dom, str};
+export const templateUtils = {dom, html, str};
 
 // Exports
 
@@ -456,6 +459,7 @@ export default {
   onEvent,
   propTypes,
   dom,
+  html,
   str,
   templateUtils
 };
