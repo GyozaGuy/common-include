@@ -64,9 +64,17 @@ export function Component(componentName) {
           }
 
           if (typeof this.render === 'function') {
-            // TODO: diffing instead of replacing
-            while (this.root.firstChild) {
-              this.root.firstChild.remove();
+            // TODO: diff instead of replacing
+
+            if (this.shadowRoot && this.styles) {
+              // NOTE: children[0] should be a style element
+              while (this.root.children[1]) {
+                this.root.children[1].remove();
+              }
+            } else {
+              while (this.root.firstChild) {
+                this.root.firstChild.remove();
+              }
             }
 
             this.root.appendChild(dom(this.render()));
