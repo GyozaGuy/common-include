@@ -63,6 +63,15 @@ export function Component(componentName) {
             }
           }
 
+          if (typeof this.render === 'function') {
+            // TODO: diffing instead of replacing
+            while (this.root.firstChild) {
+              this.root.firstChild.remove();
+            }
+
+            this.root.appendChild(dom(this.render()));
+          }
+
           if (typeof currentProp.setCallback === 'function' && this._rendered) {
             currentProp.setCallback(value, this);
           }
