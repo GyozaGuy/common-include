@@ -269,8 +269,8 @@ export function Component(componentName) {
 
         [
           'click',
-          'dragstart',
           'dragend',
+          'dragstart',
           'keydown',
           'keyup',
           'mouseover',
