@@ -80,6 +80,7 @@ export function Component(componentName) {
           }
         }
       };
+      this._inlineFunctions = {};
       this._propUpdaters = {};
       this._rendered = false;
       this._uniqueContextKey = Symbol('uniqueContextKey');
@@ -228,6 +229,11 @@ export function Component(componentName) {
           } else {
             currentString = JSON.stringify(currentString);
           }
+        } else if (typeof currentString === 'function') {
+          const id = Math.random().toString(36).substr(2, 9);
+
+          this._inlineFunctions[id] = currentString;
+          currentString = id;
         }
 
         return `${acc}${cur}${currentString}`;
@@ -282,9 +288,11 @@ export function Component(componentName) {
           'touchstart'
         ].forEach(event => {
           this.selectAll(`[${event}]`).forEach(el => {
-            console.log(el, event);
+            const functionName = el.getAttribute(event);
+            const eventFunction = this._inlineFunctions[functionName] || this[functionName];
+
             // TODO: find a way to clean these up
-            el.addEventListener(event, this[el.getAttribute(event)].bind(this));
+            el.addEventListener(event, eventFunction.bind(this));
           });
         });
       }
