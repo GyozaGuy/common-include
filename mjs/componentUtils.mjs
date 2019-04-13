@@ -269,16 +269,20 @@ export function Component(componentName) {
 
         [
           'click',
+          'dblclick',
           'dragend',
           'dragstart',
           'keydown',
           'keyup',
+          'mousedown',
           'mouseover',
           'mouseout',
+          'mouseup',
           'touchend',
           'touchstart'
         ].forEach(event => {
           this.selectAll(`[${event}]`).forEach(el => {
+            console.log(el, event);
             // TODO: find a way to clean these up
             el.addEventListener(event, this[el.getAttribute(event)].bind(this));
           });
