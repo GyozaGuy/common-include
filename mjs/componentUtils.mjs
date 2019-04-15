@@ -274,10 +274,12 @@ export function Component(componentName) {
         this.root.appendChild(dom(this.render()));
 
         [
+          'blur',
           'click',
           'dblclick',
           'dragend',
           'dragstart',
+          'focus',
           'keydown',
           'keyup',
           'mousedown',
@@ -293,6 +295,7 @@ export function Component(componentName) {
 
             // TODO: find a way to clean these up
             el.addEventListener(event, eventFunction.bind(this));
+            el.removeAttribute(event);
           });
         });
       }
@@ -306,7 +309,8 @@ export function Component(componentName) {
       if (this.hasOwnProperty(propName)) {
         value = this[propName];
         delete this[propName];
-      } else if (this.hasAttribute(dashName) && (this.getAttribute(dashName) || currentProp.toggle)) {
+      } else if (this.hasAttribute(dashName) &&
+                 (this.getAttribute(dashName) || currentProp.toggle)) {
         if (currentProp.hasOwnProperty('type')) {
           value = currentProp.type.cast(this.getAttribute(dashName));
         } else {
