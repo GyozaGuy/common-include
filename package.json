@@ -1,0 +1,15 @@
+{
+  "name": "common-include",
+  "version": "1.0.0",
+  "description": "Common include files",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GyozaGuy/common-include.git"
+  },
+  "author": "GyozaGuy",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/GyozaGuy/common-include/issues"
+  },
+  "homepage": "https://github.com/GyozaGuy/common-include#readme"
+}
