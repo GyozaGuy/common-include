@@ -1,10 +1,10 @@
-import propTypes from './propTypes.mjs';
-import templateUtils from './templateUtils.mjs';
+import {propTypes as pt} from './propTypes.mjs';
+import {templateUtils as tu} from './templateUtils.mjs';
 
-export const propTypes;
-export const templateUtils;
+export const propTypes = pt;
+export const templateUtils = tu;
 
 export default {
-  propTypes,
-  templateUtils
+  propTypes: pt,
+  templateUtils: tu
 };
