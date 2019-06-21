@@ -9,11 +9,9 @@ export function dom(htmlString, context) {
   template.innerHTML = htmlString;
   const elements = template.content;
 
-  if (context) {
-    [...elements.children].forEach(child => {
-      convertAttributes(child, context);
-    });
-  }
+  [...elements.children].forEach(child => {
+    convertAttributes(child, context);
+  });
 
   return elements;
 }
@@ -43,7 +41,7 @@ export function html(htmlArr, ...strings) {
 
 function convertAttributes(element, context) {
   [...element.attributes].forEach(attr => {
-    if (attr.name === '@name') {
+    if (context && attr.name === '@name') {
       context[attr.value] = element;
       element.removeAttribute(attr.name);
     } else if (/^#/.test(attr.name)) {
